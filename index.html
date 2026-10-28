@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>smart 파일 압축기 | 국립한국해양대학교</title>
+  <meta name="description" content="문서 파일을 업로드하면 ZIP 파일 방식으로 강력하게 압축하여 용량을 줄여주는 스마트 파일 압축기">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- JSZip Local & Fallback for 100% Reliable ZIP Compression -->
+  <script src="jszip.min.js"></script>
+  <script>
+    if (typeof JSZip === 'undefined') {
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"><\/script>');
+    }
+  </script>
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Light Ambient Background -->
+  <div class="light-bg-elements">
+    <div class="bg-shape shape-1"></div>
+    <div class="bg-shape shape-2"></div>
+    <div class="bg-shape shape-3"></div>
+  </div>
+
+  <div class="app-container">
+    <!-- Header with KMOU Official Emblem Logo -->
+    <header class="app-header">
+      <div class="header-logo-area">
+        <a href="https://kmou.ac.kr" target="_blank" rel="noopener noreferrer" class="kmou-brand-link" title="국립한국해양대학교 공식 홈페이지 바로가기 (새창 열림)">
+          <img src="logo.svg" alt="국립한국해양대학교 로고" class="kmou-emblem-img">
+          <div class="brand-text-group">
+            <span class="univ-name-kr">국립한국해양대학교</span>
+            <span class="univ-name-en">KOREA MARITIME & OCEAN UNIVERSITY</span>
+          </div>
+          <span class="external-link-badge">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> kmou.ac.kr
+          </span>
+        </a>
+      </div>
+
+      <div class="header-engine-status">
+        <span class="live-dot"></span>
+        <span class="engine-text">스마트 ZIP 압축기</span>
+      </div>
+    </header>
+
+    <!-- Hero Title Section -->
+    <section class="hero-box">
+      <div class="feature-tag">
+        <i class="fa-solid fa-file-zipper"></i> 스마트 ZIP 파일 압축 솔루션
+      </div>
+      <h1 class="main-title">smart 파일 압축기</h1>
+      <p class="subtitle">
+        HWP, PDF, PPT, DOC, TXT 등 문서 파일을 선택하여 목록을 확인한 후, <strong>압축 시작</strong>을 누르면 ZIP 방식으로 안전하게 압축합니다.
+      </p>
+    </section>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- 1. Central Upload Dropzone (Click to Open Windows Explorer) -->
+      <div class="upload-card" id="dropzoneCard">
+        <input type="file" id="fileInput" multiple accept="*/*" class="hidden-file-input">
+        
+        <div class="upload-inner">
+          <div class="icon-circle">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+          </div>
+          <h2 class="upload-heading">압축할 문서 파일을 선택하거나 여기로 드래그하세요</h2>
+          <p class="upload-formats">
+            <span>HWP/HWPX</span> · <span>PDF</span> · <span>PPT/PPTX</span> · <span>DOC/DOCX</span> · <span>TXT</span> · <span>모든 포맷 지원</span>
+          </p>
+          
+          <!-- Central Button to open Windows Explorer -->
+          <div class="btn-group-center">
+            <button type="button" class="btn-primary-blue" id="btnSelectFiles">
+              <i class="fa-regular fa-folder-open"></i>
+              <span>파일 선택하기 (윈도우 탐색기 열기)</span>
+            </button>
+          </div>
+          
+          <div class="upload-notice">
+            <i class="fa-solid fa-circle-check"></i> 파일을 여러 개 한 번에 선택할 수 있습니다. (선택 후 리스트에서 확인 가능)
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. File List Section (Appears immediately upon file selection) -->
+      <div class="file-list-section hidden" id="fileListCard">
+        <div class="list-header">
+          <div class="list-title">
+            <i class="fa-solid fa-list-check"></i>
+            <span>선택된 파일 목록</span>
+            <span class="count-pill" id="fileCountBadge">0</span>
+          </div>
+          <div class="list-tools">
+            <button type="button" class="btn-add-more" id="btnAddMoreFiles">
+              <i class="fa-solid fa-plus"></i> 파일 추가하기
+            </button>
+            <button type="button" class="btn-clear" id="btnClearList">
+              <i class="fa-regular fa-trash-can"></i> 전체 비우기
+            </button>
+          </div>
+        </div>
+
+        <!-- Dynamic Files List Container -->
+        <div class="file-list-body" id="fileItemsContainer">
+          <!-- Injected via JavaScript -->
+        </div>
+
+        <!-- Start Compression Button Area (Directly below the file list) -->
+        <div class="list-bottom-action" id="listActionArea">
+          <div class="action-prompt-text">
+            선택된 <strong id="bottomSelectedCount">0</strong>개 파일의 원본 용량: <strong id="bottomTotalSize">0 B</strong>
+          </div>
+          
+          <button type="button" class="btn-main-compress" id="btnStartCompression">
+            <i class="fa-solid fa-bolt"></i>
+            <span>압축 시작 (ZIP 변환)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 3. Circular Progress & Compression Status Dashboard (Shown when compression begins) -->
+      <div class="progress-dashboard-card hidden" id="progressDashboardCard">
+        <div class="dashboard-grid">
+          
+          <!-- Circular Progress Ring (Matches design) -->
+          <div class="circular-gauge-container">
+            <div class="gauge-wrapper">
+              <svg class="gauge-svg" width="170" height="170" viewBox="0 0 170 170">
+                <circle class="gauge-track" cx="85" cy="85" r="68" stroke-width="14"></circle>
+                <circle class="gauge-fill" id="globalProgressRing" cx="85" cy="85" r="68" stroke-width="14" stroke-dasharray="427.25" stroke-dashoffset="427.25"></circle>
+              </svg>
+              <div class="gauge-center-content">
+                <span class="gauge-percent" id="globalProgressPercent">0%</span>
+                <span class="gauge-status-label" id="globalProgressLabel">압축 준비</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Progress Info & Action Controls -->
+          <div class="dashboard-details">
+            <div class="status-header">
+              <h3 class="status-title" id="progressStatusTitle">ZIP 압축을 진행하고 있습니다...</h3>
+              <p class="status-subtitle" id="progressStatusDesc">문서 데이터 분석 및 최대 압축 레벨(DEFLATE Level 9) 적용 중</p>
+            </div>
+
+            <!-- Stats Overview -->
+            <div class="stats-row">
+              <div class="stat-card">
+                <span class="s-label">선택된 파일</span>
+                <strong class="s-value" id="statFileCount">0개</strong>
+              </div>
+              <div class="stat-card">
+                <span class="s-label">원본 총 용량</span>
+                <strong class="s-value" id="statOriginalSize">0 KB</strong>
+              </div>
+              <div class="stat-card">
+                <span class="s-label">ZIP 압축 후 용량</span>
+                <strong class="s-value val-blue" id="statCompressedSize">계산 중...</strong>
+              </div>
+              <div class="stat-card">
+                <span class="s-label">용량 절감률</span>
+                <strong class="s-value val-green" id="statSavedPercent">-</strong>
+              </div>
+            </div>
+
+            <!-- Action Controls (Stop / Resume / Download / Reset) -->
+            <div class="control-actions-bar">
+              <!-- Stop / Cancel Compression Button -->
+              <button type="button" class="btn-action-cancel" id="btnCancelCompression">
+                <i class="fa-solid fa-circle-stop"></i>
+                <span>압축 중단</span>
+              </button>
+
+              <!-- Resume / Re-start Button (Shown if paused) -->
+              <button type="button" class="btn-action-start hidden" id="btnResumeCompression">
+                <i class="fa-solid fa-play"></i>
+                <span>압축 계속 진행하기</span>
+              </button>
+
+              <!-- Download All Zip Button (Shown when 100% complete) -->
+              <button type="button" class="btn-action-download hidden" id="btnDownloadAll">
+                <i class="fa-solid fa-file-zipper"></i>
+                <span>전체 압축 파일 다운로드 (.zip)</span>
+              </button>
+
+              <!-- Reset Button -->
+              <button type="button" class="btn-action-reset" id="btnResetAll">
+                <i class="fa-solid fa-rotate-left"></i>
+                <span>새로 압축하기</span>
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Key Advantages Section -->
+    <section class="features-row">
+      <div class="feature-card">
+        <div class="f-icon"><i class="fa-solid fa-list-check"></i></div>
+        <h3>파일 목록 사전 확인</h3>
+        <p>선택한 문서 목록과 파일 크기를 먼저 확인하고, 원하는 파일만 골라 <strong>압축 시작</strong>을 누를 수 있습니다.</p>
+      </div>
+      <div class="feature-card">
+        <div class="f-icon"><i class="fa-solid fa-file-zipper"></i></div>
+        <h3>표준 ZIP 압축 방식</h3>
+        <p>모든 문서를 표준 ZIP 알고리즘(DEFLATE Level 9)으로 강력 압축하여 용량을 최소화합니다.</p>
+      </div>
+      <div class="feature-card">
+        <div class="f-icon"><i class="fa-solid fa-shield-check"></i></div>
+        <h3>100% 안전한 로컬 처리</h3>
+        <p>외부 서버 전송 없이 사용자 컴퓨터 내부에서 바로 ZIP 압축이 이루어져 문서의 보안이 철저히 지켜집니다.</p>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div class="footer-inner">
+        <div class="footer-left">
+          <strong>smart 파일 압축기</strong> · 국립한국해양대학교 (KMOU)
+        </div>
+        <div class="footer-right">
+          <a href="https://kmou.ac.kr" target="_blank" rel="noopener noreferrer">국립한국해양대학교 공식 포털</a>
+          <span class="sep">|</span>
+          <span>스마트 ZIP 파일 압축 시스템</span>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
